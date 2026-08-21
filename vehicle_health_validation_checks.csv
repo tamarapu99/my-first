@@ -1,0 +1,12 @@
+check,result,count,status,action
+Vehicle count == 30 and == vehicles.csv row count,30 rows; vehicles.csv has 30,0,Pass,None.
+Vehicle_ID uniqueness,30 unique / 30,0,Pass,None.
+Every vehicle in vehicles.csv is accounted for in output,Missing: set(),0,Pass,None.
+"vehicle_health_status only takes values {Normal, Watch, Investigate}",Invalid values: 0,0,Pass,None.
+No missing values in core metric columns,NaNs across 6 columns,0,Pass,None.
+No division-by-zero risk (telemetry_row_count > 0 for all vehicles),Vehicles with 0 telemetry rows: 0,0,Pass,None.
+No division-by-zero risk (total_trips > 0 for all vehicles),Vehicles with 0 trips: 0,0,Pass,None.
+"Percentage-based metrics within [0,100]",Out-of-range values: 0,0,Pass,None.
+Independent recompute of core metrics reconciles with output (all 30 vehicles),Mismatches: 0,0,Pass,None.
+Status classification consistent with disclosed rule for all 30 vehicles,Mismatches: 0,0,Pass,None.
+Cut-point constants match recomputation from current data,Matches: True,0,Pass,None.

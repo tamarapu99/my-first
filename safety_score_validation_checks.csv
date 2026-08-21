@@ -1,0 +1,12 @@
+check,result,count,status,action
+"One row per Driver_ID, matches drivers.csv",30 rows; drivers.csv has 30,0,Pass,None.
+Driver_ID uniqueness,30 unique / 30,0,Pass,None.
+"driver_safety_score within [0,100] for all scored drivers",Checked 30 scored drivers,0,Pass,None.
+No division-by-zero (weighted_exposure_min > 0 for all scored drivers),Scored drivers with zero weighted exposure: 0,0,Pass,None.
+total_trips reconciles with driver_trip_features.csv,Mismatches: 0,0,Pass,None.
+Overlap-flagged trip exclusion count reconciles with driver_trip_features.csv,Drivers with mismatched excluded-overlap count: 0,0,Pass,None.
+usable_trips + excluded_overlap_trips == total_trips,Violations: 0,0,Pass,None.
+clean_usable_trips + downweighted_usable_trips == usable_trips,Violations: 0,0,Pass,None.
+Independent recompute of accel_rate_per10min for all scored drivers,Mismatches: 0,0,Pass,None.
+Component scores reconcile with final driver_safety_score (equal weighting),Mismatches: 0,0,Pass,None.
+No missing driver_safety_score among SCORED drivers,NaNs: 0,0,Pass,None.

@@ -1,0 +1,87 @@
+{
+  "source_excel": "VEXAR_Fleet_Dataset_CANDIDATE_VERSION (1).xlsx",
+  "source_excel_modified": false,
+  "records_removed": 0,
+  "records_retained": {
+    "drivers": 30,
+    "vehicles": 30,
+    "trips": 450,
+    "telemetry": 12987
+  },
+  "lookup_tables": {
+    "trip_overlaps_driver": 23,
+    "trip_overlaps_vehicle": 22
+  },
+  "fields_changed": "None. Original IDs and original values are preserved. D08 and D21 Age/License_Experience_Years are unchanged. Duplicate names kept. Only dtype coercion and Start_Time/End_Time written as HH:MM:SS (same clock).",
+  "new_derived_fields_not_replacing_originals": [
+    "trips.start_ts / end_ts / duration_clock_min",
+    "trips.telemetry_row_count / gps_path_km / speed_integral_km",
+    "trips.telemetry_avg_speed_kmph / telemetry_max_speed_kmph",
+    "telemetry.timestamp_gap_s / gps_step_km / speed_delta_kmph"
+  ],
+  "quality_flags_created": {
+    "drivers.flag_duplicate_name": 4,
+    "drivers.flag_license_vs_age": 2,
+    "trips.flag_overlap_driver": 45,
+    "trips.flag_overlap_vehicle": 43,
+    "trips.flag_non_primary_vehicle": 14,
+    "trips.flag_distance_vs_gps": 36,
+    "trips.flag_distance_vs_speed_integral": 243,
+    "trips.flag_has_gps_teleport": 2,
+    "trips.flag_has_speed_jump": 37,
+    "telemetry.flag_gps_teleport": 5,
+    "telemetry.flag_speed_jump": 47,
+    "telemetry.flag_gps_wgs84_invalid": 0,
+    "telemetry.flag_speed_out_of_range": 0,
+    "telemetry.flag_accel_outlier": 0,
+    "telemetry.flag_gyro_outlier": 0,
+    "telemetry.flag_timestamp_gap_irregular": 0
+  },
+  "thresholds": {
+    "gps_step_km": 2.0,
+    "speed_min": 0.0,
+    "speed_max": 90.0,
+    "speed_jump_kmph": 50.0,
+    "accel_axis_g": 3.0,
+    "accel_mag_lo": 0.5,
+    "accel_mag_hi": 2.5,
+    "gyro_axis_dps": 100.0,
+    "dist_gps_abs_km": 3.0,
+    "dist_gps_rel": 0.25,
+    "dist_speed_abs_km": 3.0,
+    "timestamp_gap_tol_s": 5.0,
+    "min_license_age": 16
+  },
+  "output_dir": "/Users/charan/Documents/vexardrive_Assignment/processed/analytical",
+  "files": {
+    "drivers.csv": {
+      "rows": 30,
+      "path": "/Users/charan/Documents/vexardrive_Assignment/processed/analytical/drivers.csv"
+    },
+    "vehicles.csv": {
+      "rows": 30,
+      "path": "/Users/charan/Documents/vexardrive_Assignment/processed/analytical/vehicles.csv"
+    },
+    "trips.csv": {
+      "rows": 450,
+      "path": "/Users/charan/Documents/vexardrive_Assignment/processed/analytical/trips.csv"
+    },
+    "telemetry.csv": {
+      "rows": 12987,
+      "path": "/Users/charan/Documents/vexardrive_Assignment/processed/analytical/telemetry.csv"
+    },
+    "trip_overlaps_driver.csv": {
+      "rows": 23,
+      "path": "/Users/charan/Documents/vexardrive_Assignment/processed/analytical/trip_overlaps_driver.csv"
+    },
+    "trip_overlaps_vehicle.csv": {
+      "rows": 22,
+      "path": "/Users/charan/Documents/vexardrive_Assignment/processed/analytical/trip_overlaps_vehicle.csv"
+    }
+  },
+  "notes": [
+    "No driver safety scores computed.",
+    "No vehicle health scores computed.",
+    "Distance_KM was not overwritten; gps_path_km and speed_integral_km are extra columns."
+  ]
+}

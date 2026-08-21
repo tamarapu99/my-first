@@ -1,0 +1,79 @@
+{
+  "step": "Step 5 - Driver-level safety scoring",
+  "approved_decisions_source": "User-approved Step 5 decisions (this conversation); no thresholds/weights/formula invented beyond implementing those decisions.",
+  "input_files": {
+    "driver_trip_features.csv": "Step 4 output, read-only",
+    "drivers.csv": "Step 3 output, read-only (for flag_duplicate_name, flag_license_vs_age context only)"
+  },
+  "excel_modified": false,
+  "step2_3_4_files_modified": false,
+  "protected_file_hash_check": "unchanged before/after run",
+  "output_grain": "one row per Driver_ID",
+  "row_count": 30,
+  "expected_row_count": 30,
+  "primary_features": {
+    "harsh_accel_events": "trip-level count, from driver_trip_features.csv (Step 4)",
+    "harsh_brake_events": "trip-level count, from driver_trip_features.csv (Step 4)",
+    "harsh_event_rate_per_10min": "trip-level rate, from driver_trip_features.csv (Step 4)",
+    "speed_delta_mean_kmph": "trip-level mean, from driver_trip_features.csv (Step 4). NOTE: user's approval referred to this feature as 'speed_delta_kmph'; driver_trip_features.csv has no column of that exact name, and this is the only Step-4 speed-delta feature available, so it is used as the intended referent. Flagged here for visibility rather than assumed silently."
+  },
+  "excluded_features": {
+    "speed_std_kmph": "excluded per approval (traffic/context dependent)",
+    "stop_count": "excluded per approval (traffic/context dependent)",
+    "stop_duration_min": "excluded per approval (traffic/context dependent)",
+    "optional_high_speed_time_pct": "excluded per approval (Step 4 already excluded from primary behavioural assessment)",
+    "optional_accel_mag_mean_g": "excluded, same reason",
+    "optional_accel_mag_std_g": "excluded, same reason",
+    "optional_gyro_mag_mean_dps": "excluded, same reason"
+  },
+  "directionality": "Higher values of all 4 primary components (more harsh accel/brake events, higher event rate, larger mean speed delta) => higher risk => lower driver_safety_score.",
+  "weighting": {
+    "scheme": "Equal weighting across the 4 approved components",
+    "component_weight_each": 0.25,
+    "justification": "No alternative weighting scheme is defined anywhere in the approved Step 2-4 project; user's Step 5 approval explicitly specified equal weighting as the default in that case."
+  },
+  "aggregation_method": {
+    "type": "Exposure-weighted (not unweighted mean of per-trip rates)",
+    "accel_rate_per10min_formula": "sum(harsh_accel_events * trip_weight over usable trips) / sum(trip_duration_min * trip_weight over usable trips) * 10",
+    "brake_rate_per10min_formula": "sum(harsh_brake_events * trip_weight over usable trips) / sum(trip_duration_min * trip_weight over usable trips) * 10",
+    "harsh_event_rate_per_10min_weighted_formula": "weighted average of trip-level harsh_event_rate_per_10min, weights = trip_duration_min * trip_weight",
+    "speed_delta_mean_kmph_weighted_formula": "weighted average of trip-level speed_delta_mean_kmph, weights = trip_duration_min * trip_weight",
+    "trip_weight_definition": "1.0 for a clean usable trip (any_trip_quality_flag==0); 0.5 for a quality-flagged usable trip (any_trip_quality_flag==1); 0 (fully excluded, not just down-weighted) for any trip with flag_overlap_driver==1",
+    "usable_trips_definition": "All of a driver's trips EXCEPT those with flag_overlap_driver==1"
+  },
+  "score_format": {
+    "scale": "0-100 fixed scale, 100=safest, 0=highest risk",
+    "cohort_relative": false,
+    "method": "Each of the 4 components is mapped to a 0-100 sub-score via a fixed linear scale (value=0 -> 100, value>=ceiling -> 0), then averaged with equal weights. Ceilings are hard-coded constants, not recomputed from whichever drivers are present in a given run, so scores are reproducible independent of cohort composition.",
+    "risk_ceilings": {
+      "accel_rate_per10min": 2.0,
+      "brake_rate_per10min": 2.0,
+      "harsh_event_rate_per_10min": 3.0,
+      "speed_delta_mean_kmph": 20.0
+    },
+    "risk_ceiling_derivation": "Set at approximately the 99th percentile of the driver-level exposure-weighted value observed in the current 30-driver dataset, rounded up to one decimal place, then fixed as a constant for reproducibility across future runs/cohorts."
+  },
+  "quality_flag_handling": {
+    "rule": "Down-weighted, not removed",
+    "quality_flag_weight": 0.5,
+    "clean_weight": 1.0,
+    "applies_to": "any_trip_quality_flag==1 trips (excluding overlap-excluded trips, which are handled separately per rule 8)",
+    "data_confidence_pct_definition": "100 * clean_usable_trips / usable_trips, per driver. Reported separately from the safety score, not blended into it.",
+    "flags_retained": "flag_duplicate_name, flag_license_vs_age (driver-level) and all trip-level quality/overlap flags remain visible in Step 4 output; driver_safety_scores.csv reports counts derived from them (clean_usable_trips, downweighted_usable_trips, data_confidence_pct) without deleting or hiding the underlying flags."
+  },
+  "overlap_flagged_trip_handling": {
+    "rule": "Excluded entirely from scoring calculation (trip_weight=0); underlying rows in driver_trip_features.csv, trips.csv, telemetry.csv untouched.",
+    "total_overlap_trips_excluded_fleet_wide": 45,
+    "total_overlap_exposure_minutes_excluded_fleet_wide": 1334.0
+  },
+  "driver_master_data_flags": {
+    "flag_duplicate_name": "Carried through from drivers.csv unchanged; zero effect on driver_safety_score.",
+    "flag_license_vs_age": "Carried through from drivers.csv unchanged; zero effect on driver_safety_score."
+  },
+  "notes": [
+    "No dashboard built in this step.",
+    "No new thresholds/weights invented beyond implementing the explicitly approved rules; risk ceilings and quality-flag weight are the numeric parameters required to implement approved rules 6 and 7 and are fully disclosed above.",
+    "processed/*.csv (Step 2 files) not read or modified.",
+    "Data/*.xlsx not read or modified."
+  ]
+}

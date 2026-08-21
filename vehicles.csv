@@ -1,0 +1,31 @@
+Vehicle_ID,Vehicle_Type,Make,Model,Manufacture_Year,Registration_Date,Odometer_KM_Start_of_Week,Last_Service_Date
+V01,Two-Wheeler (Scooter/Motorcycle),Yamaha,Ray ZR,2021,2021-04-23,22820,2026-06-08
+V02,Two-Wheeler (Scooter/Motorcycle),TVS,Raider,2021,2021-03-26,46601,2026-05-06
+V03,Two-Wheeler (Scooter/Motorcycle),Yamaha,Ray ZR,2022,2022-11-07,14883,2026-07-08
+V04,Two-Wheeler (Scooter/Motorcycle),Honda,Activa,2020,2020-07-02,5533,2026-07-19
+V05,Two-Wheeler (Scooter/Motorcycle),TVS,Raider,2025,2025-02-25,2727,2026-07-12
+V06,Two-Wheeler (Scooter/Motorcycle),Ola,S1,2025,2025-03-25,3065,2026-07-18
+V07,Two-Wheeler (Scooter/Motorcycle),Hero,Splendor,2021,2021-01-21,6030,2026-07-14
+V08,Two-Wheeler (Scooter/Motorcycle),Hero,Splendor,2021,2021-11-03,11444,2026-07-12
+V09,Two-Wheeler (Scooter/Motorcycle),Hero,Splendor,2020,2020-01-26,14294,2026-07-24
+V10,Two-Wheeler (Scooter/Motorcycle),TVS,Ntorq,2019,2019-01-23,30162,2026-07-01
+V11,Two-Wheeler (Scooter/Motorcycle),Suzuki,Access,2020,2020-05-17,11219,2026-07-09
+V12,Two-Wheeler (Scooter/Motorcycle),TVS,Ntorq,2020,2020-04-09,31966,2026-06-09
+V13,Two-Wheeler (Scooter/Motorcycle),Bajaj,Pulsar,2025,2025-06-14,22372,2026-07-01
+V14,Two-Wheeler (Scooter/Motorcycle),TVS,Raider,2019,2019-03-07,5270,2026-07-26
+V15,Two-Wheeler (Scooter/Motorcycle),TVS,Ntorq,2023,2023-12-04,20041,2026-06-19
+V16,Two-Wheeler (Scooter/Motorcycle),TVS,Raider,2023,2023-10-16,22089,2026-06-30
+V17,Two-Wheeler (Scooter/Motorcycle),Ola,S1,2024,2024-01-20,2639,2026-07-13
+V18,Two-Wheeler (Scooter/Motorcycle),Ola,S1,2019,2019-06-04,9158,2026-07-08
+V19,Two-Wheeler (Scooter/Motorcycle),TVS,Ntorq,2021,2021-12-09,17247,2026-06-19
+V20,Two-Wheeler (Scooter/Motorcycle),Yamaha,Ray ZR,2023,2023-04-26,8533,2026-07-23
+V21,Two-Wheeler (Scooter/Motorcycle),TVS,Raider,2025,2025-06-01,9558,2026-07-17
+V22,Two-Wheeler (Scooter/Motorcycle),Honda,Activa,2023,2023-11-03,11264,2026-07-26
+V23,Two-Wheeler (Scooter/Motorcycle),Suzuki,Access,2021,2021-01-27,17821,2026-06-16
+V24,Two-Wheeler (Scooter/Motorcycle),Honda,Activa,2025,2025-09-22,22345,2026-06-20
+V25,Two-Wheeler (Scooter/Motorcycle),Suzuki,Access,2024,2024-11-01,26280,2026-07-03
+V26,Two-Wheeler (Scooter/Motorcycle),Bajaj,Pulsar,2024,2024-04-22,22871,2026-06-28
+V27,Two-Wheeler (Scooter/Motorcycle),Bajaj,Pulsar,2022,2022-10-17,14098,2026-07-10
+V28,Two-Wheeler (Scooter/Motorcycle),Ola,S1,2023,2023-04-12,17021,2026-06-23
+V29,Two-Wheeler (Scooter/Motorcycle),TVS,Raider,2021,2021-02-18,14495,2026-07-10
+V30,Two-Wheeler (Scooter/Motorcycle),Bajaj,Pulsar,2022,2022-07-07,5127,2026-07-24

@@ -1,0 +1,13 @@
+check,result,count,status,action
+Row count == 450 and == trips.csv row count,driver_trip_features rows 450; trips.csv rows 450,0,Pass,None.
+Trip_ID uniqueness,450 unique / 450 rows,0,Pass,None.
+Driver_ID / Vehicle_ID integrity vs trips.csv,Mismatches: 0,0,Pass,None.
+No silent redefinition of Duration_Min/Distance_KM/Avg_Speed_kmph/Max_Speed_kmph,"duration=0, distance=0, avg_speed=0, max_speed=0",0,Pass,None.
+No negative durations/distances/speeds/counts,"Checked columns: ['trip_duration_min', 'trip_distance_km', 'min_speed_kmph', 'avg_speed_kmph', 'max_speed_kmph', 'stop_count', 'stop_duration_min', 'moving_time_min', 'harsh_accel_events', 'harsh_brake_events']",0,Pass,None.
+stop_duration_min <= trip_duration_min,Violations: 0,0,Pass,None.
+Division-by-zero risk in harsh_event_rate_per_10min (trip_duration_min > 0),Trips with duration <= 0: 0,0,Pass,None.
+Missing values in generated feature columns,Total NaNs across 27 feature columns,0,Pass,None.
+Independent recompute of harsh_accel_events / harsh_brake_events (all 450 trips),"Mismatched trips: accel=0, brake=0",0,Pass,None.
+Duplicate full feature rows,0 duplicate rows,0,Pass,None.
+Harsh-event / high-speed thresholds match recomputed p90 of current telemetry,"harsh delta p90=25.4, speed p90=37.4",0,Pass,None.
+Step 4 harsh threshold (25.4) stays below existing approved Step 3 speed_jump_kmph threshold (50.0),0.37% of deltas exceed 50 km/h/min,0,Pass,None. No Step 3 threshold was redefined.

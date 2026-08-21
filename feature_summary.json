@@ -1,0 +1,262 @@
+{
+  "step": "Step 4 - Trip-level feature engineering for driver behaviour analysis",
+  "source_layer": "processed/analytical/ (Step 3 certified output; not re-derived from Excel)",
+  "excel_modified": false,
+  "step2_step3_files_modified": false,
+  "protected_file_hash_check": "unchanged before/after run for all Step 2/3 outputs + Excel",
+  "output_grain": "one row per Trip_ID",
+  "row_count": 450,
+  "expected_row_count": 450,
+  "thresholds": {
+    "harsh_event_delta_kmph": 25.4,
+    "harsh_event_delta_kmph_justification": "90th percentile of |minute-to-minute speed change| across 12537 valid consecutive-minute pairs in the current telemetry layer (recomputed p90 = 25.4 km/h). Chosen instead of the existing Step 3 speed_jump_kmph=50.0 threshold because that value is calibrated as a rare data-quality outlier flag (0.37% of deltas exceed it), not a driver-behaviour signal; 25.4 is well below 50.0 so the two concepts do not overlap and no existing Step 3 rule is redefined.",
+    "high_speed_kmph": 37.4,
+    "high_speed_kmph_justification": "90th percentile of instantaneous Speed_kmph across the current telemetry layer (recomputed p90 = 37.4 km/h). No approved behavioural speed threshold exists in Step 2/3 documentation - only the speed_min/speed_max=[0,90] plausibility validity range, which no observed reading approaches (max observed 73.6 km/h) and is therefore not usable as a behavioural cutoff. This is a fleet-relative statistic, not a claim of exceeding a legal or posted speed limit (no such field exists in the source data).",
+    "existing_step3_thresholds_referenced_not_modified": {
+      "speed_jump_kmph": 50.0,
+      "speed_min_max_kmph": [
+        0.0,
+        90.0
+      ]
+    }
+  },
+  "threshold_verification": {
+    "n_valid_deltas": 12537,
+    "p90_abs_delta_kmph": 25.4,
+    "matches_configured_harsh_threshold": true,
+    "p90_speed_kmph": 37.4,
+    "matches_configured_high_speed_threshold": true,
+    "existing_step3_speed_jump_kmph": 50.0,
+    "harsh_threshold_below_existing_speed_jump_threshold": true,
+    "pct_deltas_exceeding_existing_speed_jump_threshold": 0.37
+  },
+  "features": {
+    "trip_duration_min": {
+      "formula": "pass-through of trips.Duration_Min",
+      "source": "trips.csv:Duration_Min",
+      "unit": "minutes",
+      "grain": "trip",
+      "threshold": null
+    },
+    "trip_distance_km": {
+      "formula": "pass-through of trips.Distance_KM",
+      "source": "trips.csv:Distance_KM",
+      "unit": "km",
+      "grain": "trip",
+      "threshold": null,
+      "note": "Distance_KM documented as approximate; disagrees with speed-integral on 243/450 trips per Step 3 validation (flag_distance_vs_speed_integral). Not recomputed here."
+    },
+    "avg_speed_kmph": {
+      "formula": "pass-through of trips.Avg_Speed_kmph",
+      "source": "trips.csv:Avg_Speed_kmph",
+      "unit": "km/h",
+      "grain": "trip",
+      "threshold": null
+    },
+    "max_speed_kmph": {
+      "formula": "pass-through of trips.Max_Speed_kmph",
+      "source": "trips.csv:Max_Speed_kmph",
+      "unit": "km/h",
+      "grain": "trip",
+      "threshold": null
+    },
+    "min_speed_kmph": {
+      "formula": "min(Speed_kmph) grouped by Trip_ID",
+      "source": "telemetry.csv:Speed_kmph",
+      "unit": "km/h",
+      "grain": "trip",
+      "threshold": null
+    },
+    "speed_std_kmph": {
+      "formula": "std(Speed_kmph, ddof=1) grouped by Trip_ID",
+      "source": "telemetry.csv:Speed_kmph",
+      "unit": "km/h",
+      "grain": "trip",
+      "threshold": null
+    },
+    "speed_range_kmph": {
+      "formula": "telemetry_max_speed_kmph (Step 3) - min_speed_kmph",
+      "source": "trips.csv:telemetry_max_speed_kmph; derived min_speed_kmph",
+      "unit": "km/h",
+      "grain": "trip",
+      "threshold": null
+    },
+    "harsh_accel_events": {
+      "formula": "count of rows where Speed_kmph[t]-Speed_kmph[t-1] > 25.4, ordered by Timestamp within Trip_ID",
+      "source": "telemetry.csv:Speed_kmph,Timestamp",
+      "unit": "count",
+      "grain": "trip",
+      "threshold": "25.4 km/h per 60s",
+      "reason": "p90 of |\u0394speed| fleet-wide; below existing 50 km/h/min Step 3 data-quality threshold"
+    },
+    "harsh_brake_events": {
+      "formula": "count of rows where Speed_kmph[t]-Speed_kmph[t-1] < -25.4",
+      "source": "telemetry.csv:Speed_kmph,Timestamp",
+      "unit": "count",
+      "grain": "trip",
+      "threshold": "25.4 km/h per 60s (symmetric)",
+      "reason": "same as harsh_accel_events"
+    },
+    "harsh_event_rate_per_10min": {
+      "formula": "(harsh_accel_events + harsh_brake_events) / (trip_duration_min/10)",
+      "source": "derived",
+      "unit": "events per 10 min",
+      "grain": "trip",
+      "threshold": null,
+      "reason": "normalizes across 10-45 min trips"
+    },
+    "speed_delta_mean_kmph": {
+      "formula": "mean(|\u0394speed|) over trip's valid minute-to-minute deltas (reuses Step 3 telemetry.speed_delta_kmph)",
+      "source": "telemetry.csv:speed_delta_kmph",
+      "unit": "km/h",
+      "grain": "trip",
+      "threshold": null
+    },
+    "stop_count": {
+      "formula": "count of distinct runs of Speed_kmph==0 minutes, ordered by Timestamp",
+      "source": "telemetry.csv:Speed_kmph",
+      "unit": "count",
+      "grain": "trip",
+      "threshold": "0 km/h (exact)"
+    },
+    "stop_duration_min": {
+      "formula": "count of Speed_kmph==0 minutes (1 row = 1 minute)",
+      "source": "telemetry.csv:Speed_kmph",
+      "unit": "minutes",
+      "grain": "trip",
+      "threshold": "0 km/h (exact)"
+    },
+    "moving_time_min": {
+      "formula": "trip_duration_min - stop_duration_min",
+      "source": "derived",
+      "unit": "minutes",
+      "grain": "trip",
+      "threshold": null
+    },
+    "telemetry_flagged_minute_pct": {
+      "formula": "100 * (rows with any of 7 existing telemetry flags=1) / telemetry_row_count",
+      "source": "telemetry.csv existing flags (unchanged)",
+      "unit": "%",
+      "grain": "trip",
+      "threshold": null
+    },
+    "any_trip_quality_flag": {
+      "formula": "logical OR of the 7 existing trip-level flags",
+      "source": "trips.csv existing flags (unchanged)",
+      "unit": "0/1",
+      "grain": "trip",
+      "threshold": null
+    },
+    "flag_overlap_driver": {
+      "formula": "pass-through, unchanged",
+      "source": "trips.csv:flag_overlap_driver",
+      "unit": "0/1",
+      "grain": "trip",
+      "threshold": null
+    },
+    "flag_overlap_vehicle": {
+      "formula": "pass-through, unchanged",
+      "source": "trips.csv:flag_overlap_vehicle",
+      "unit": "0/1",
+      "grain": "trip",
+      "threshold": null
+    },
+    "flag_non_primary_vehicle": {
+      "formula": "pass-through, unchanged",
+      "source": "trips.csv:flag_non_primary_vehicle",
+      "unit": "0/1",
+      "grain": "trip",
+      "threshold": null
+    },
+    "flag_distance_vs_gps": {
+      "formula": "pass-through, unchanged",
+      "source": "trips.csv:flag_distance_vs_gps",
+      "unit": "0/1",
+      "grain": "trip",
+      "threshold": null
+    },
+    "flag_distance_vs_speed_integral": {
+      "formula": "pass-through, unchanged",
+      "source": "trips.csv:flag_distance_vs_speed_integral",
+      "unit": "0/1",
+      "grain": "trip",
+      "threshold": null
+    },
+    "flag_has_gps_teleport": {
+      "formula": "pass-through, unchanged",
+      "source": "trips.csv:flag_has_gps_teleport",
+      "unit": "0/1",
+      "grain": "trip",
+      "threshold": null
+    },
+    "flag_has_speed_jump": {
+      "formula": "pass-through, unchanged",
+      "source": "trips.csv:flag_has_speed_jump",
+      "unit": "0/1",
+      "grain": "trip",
+      "threshold": null
+    },
+    "optional_high_speed_time_pct": {
+      "formula": "100 * count(Speed_kmph>37.4) / telemetry_row_count",
+      "source": "telemetry.csv:Speed_kmph",
+      "unit": "%",
+      "grain": "trip",
+      "threshold": "37.4 km/h",
+      "reason": "p90 of instantaneous Speed_kmph fleet-wide; no approved speed-limit field exists",
+      "status": "optional/exploratory - not a legal-limit violation claim"
+    },
+    "optional_accel_mag_mean_g": {
+      "formula": "mean(sqrt(Accel_X_g^2+Accel_Y_g^2+Accel_Z_g^2)) per trip",
+      "source": "telemetry.csv:Accel_X_g,Accel_Y_g,Accel_Z_g",
+      "unit": "g",
+      "grain": "trip",
+      "threshold": null,
+      "status": "optional/exploratory - single per-minute snapshot, uncalibrated axis orientation"
+    },
+    "optional_accel_mag_std_g": {
+      "formula": "std(sqrt(Accel_X_g^2+Accel_Y_g^2+Accel_Z_g^2)) per trip",
+      "source": "telemetry.csv:Accel_X_g,Accel_Y_g,Accel_Z_g",
+      "unit": "g",
+      "grain": "trip",
+      "threshold": null,
+      "status": "optional/exploratory"
+    },
+    "optional_gyro_mag_mean_dps": {
+      "formula": "mean(sqrt(Gyro_X_dps^2+Gyro_Y_dps^2+Gyro_Z_dps^2)) per trip",
+      "source": "telemetry.csv:Gyro_X_dps,Gyro_Y_dps,Gyro_Z_dps",
+      "unit": "dps",
+      "grain": "trip",
+      "threshold": null,
+      "status": "optional/exploratory - cannot isolate cornering from noise at 1 sample/min with unknown mount orientation"
+    }
+  },
+  "optional_features_excluded_from_primary_behaviour_assessment": [
+    "optional_high_speed_time_pct",
+    "optional_accel_mag_mean_g",
+    "optional_accel_mag_std_g",
+    "optional_gyro_mag_mean_dps"
+  ],
+  "optional_features_exclusion_reason": "Telemetry captures one accelerometer/gyroscope snapshot per minute from an uncalibrated phone mount (orientation not documented anywhere in the source workbook), so IMU-based features cannot reliably represent driver behaviour events at this grain. They are retained only as exploratory/optional columns, clearly prefixed optional_, and should not be used in any primary driver-behaviour scoring (Step 5+) unless a higher-frequency, orientation-calibrated IMU stream becomes available.",
+  "features_excluded_entirely": {
+    "cornering_turning_severity": "Not computed. Requires known IMU axis-to-vehicle mapping and sub-second sampling; neither is available (see Step 4 Phase 1 inspection).",
+    "true_speeding_violation": "Not computed as a rule violation. No posted/legal speed-limit field exists in the source data; only the relative optional_high_speed_time_pct proxy is offered."
+  },
+  "distance_km_caveat": "Distance_KM is documented in the Data Dictionary as 'approximate, derived from per-minute speed', and Step 3 validation already found it disagrees with the actual speed integral on 243/450 trips (flag_distance_vs_speed_integral) and with GPS path on 36/450 trips (flag_distance_vs_gps). trip_distance_km is passed through unchanged and both flags are carried into driver_trip_features.csv; no new feature is built by dividing by this field.",
+  "notes": [
+    "No driver safety score computed.",
+    "No vehicle health score computed.",
+    "Step 5 (safety scoring) not started.",
+    "processed/*.csv (Step 2 files) were not read or modified.",
+    "Data/*.xlsx was not read or modified in this step."
+  ],
+  "output_files": {
+    "driver_trip_features.csv": {
+      "rows": 450,
+      "path": "/home/claude/work/vexardrive_Assignment/processed/analytical/driver_trip_features.csv"
+    },
+    "feature_validation_checks.csv": {
+      "rows": 12,
+      "path": "/home/claude/work/vexardrive_Assignment/processed/analytical/feature_validation_checks.csv"
+    }
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "step": "Step 6 - Vehicle Health Status",
+  "input_files": {
+    "vehicles.csv": "Step 3 output, read-only",
+    "trips.csv": "Step 3 output, read-only",
+    "telemetry.csv": "Step 3 output, read-only",
+    "driver_trip_features.csv": "Step 4 output, read-only (source of optional IMU aggregates only)"
+  },
+  "step5_untouched": true,
+  "excel_modified": false,
+  "step2_3_4_5_files_modified": false,
+  "protected_file_hash_check": "unchanged before/after run",
+  "output_grain": "one row per Vehicle_ID",
+  "row_count": 30,
+  "expected_row_count": 30,
+  "vehicle_health_status_counts": {
+    "Watch": 11,
+    "Normal": 10,
+    "Investigate": 9
+  },
+  "methodology": {
+    "approach": "Transparent, rule-based, per-metric classification. NOT a blended/weighted composite score.",
+    "rule": "A vehicle is 'Investigate' if ANY core metric is at/above that metric's fleet p90 (or, for gps_teleport_count, at/above 1 occurrence, since teleports are already rare/anomalous under the existing Step 3 threshold). A vehicle is 'Watch' if not Investigate but ANY core metric is at/above that metric's fleet p75. Otherwise 'Normal'.",
+    "why_no_composite_score": "No weighting scheme, formula, or risk-tier definition for vehicle health exists anywhere in the approved Step 2-4 project, and the user's Step 6 instructions require not inventing thresholds/weights. A per-metric transparent rule avoids inventing a blending formula while still producing an explainable 3-tier status - every status is traceable to the exact metric(s) that triggered it (see status_trigger_reasons column)."
+  },
+  "core_metrics_used_for_status": {
+    "gps_teleport_count": {
+      "formula": "sum(telemetry.flag_gps_teleport) per Vehicle_ID",
+      "source": "telemetry.csv:flag_gps_teleport (existing Step 3 flag, threshold gps_step_km=2.0km/60s, unchanged)",
+      "unit": "count",
+      "grain": "vehicle",
+      "rule": ">=1 occurrence => Investigate",
+      "reason_for_rule": "Only 5 GPS-teleport events exist across the entire 12,987-row telemetry dataset (2/30 vehicles have any). This event was already established as rare/implausible by the existing, unmodified Step 3 threshold; with so few occurrences fleet-wide, any occurrence is itself the signal - a percentile cut on a count this sparse would not be meaningful."
+    },
+    "speed_jump_rate_per_1000min": {
+      "formula": "sum(telemetry.flag_speed_jump) / telemetry_row_count * 1000, per Vehicle_ID",
+      "source": "telemetry.csv:flag_speed_jump (existing Step 3 flag, threshold speed_jump_kmph=50.0, unchanged)",
+      "unit": "flagged minutes per 1,000 telemetry minutes",
+      "grain": "vehicle",
+      "watch_threshold": 2.718,
+      "investigate_threshold": 9.053,
+      "threshold_justification": "Fleet-wide p75/p90 of this rate across the current 30 vehicles."
+    },
+    "distance_vs_gps_trip_pct": {
+      "formula": "100 * mean(trips.flag_distance_vs_gps) per Vehicle_ID",
+      "source": "trips.csv:flag_distance_vs_gps (existing Step 3 flag, thresholds dist_gps_abs_km=3.0 / dist_gps_rel=0.25, unchanged)",
+      "unit": "% of vehicle's trips",
+      "grain": "vehicle",
+      "watch_threshold": 12.316,
+      "investigate_threshold": 18.875,
+      "threshold_justification": "Fleet-wide p75/p90 of this pct across the current 30 vehicles."
+    },
+    "distance_vs_speed_integral_trip_pct": {
+      "formula": "100 * mean(trips.flag_distance_vs_speed_integral) per Vehicle_ID",
+      "source": "trips.csv:flag_distance_vs_speed_integral (existing Step 3 flag, threshold dist_speed_abs_km=3.0, unchanged)",
+      "unit": "% of vehicle's trips",
+      "grain": "vehicle",
+      "watch_threshold": 64.154,
+      "investigate_threshold": 73.5,
+      "threshold_justification": "Fleet-wide p75/p90 of this pct across the current 30 vehicles. Note: this flag is common fleet-wide (fires on 243/450 trips overall per Step 3/4), so the RELATIVE rate per vehicle (30.8%-80.0% range observed) is the meaningful signal here, not the absolute presence of the flag."
+    }
+  },
+  "dead_flags_not_usable_for_differentiation": {
+    "flag_accel_outlier": "0/12,987 telemetry rows fleet-wide - never fires, provides zero differentiating power between vehicles.",
+    "flag_gyro_outlier": "0/12,987 - never fires.",
+    "flag_gps_wgs84_invalid": "0/12,987 - never fires.",
+    "flag_speed_out_of_range": "0/12,987 - never fires.",
+    "flag_timestamp_gap_irregular": "0/12,987 - never fires (confirms the exact 60s telemetry grid already established in Step 3).",
+    "note": "These are still included in the generic sensor_flagged_minute_pct descriptive column for completeness/future-proofing, but currently contribute nothing to it and were not usable to differentiate vehicles in this dataset."
+  },
+  "descriptive_context_column": {
+    "sensor_flagged_minute_pct": "100 * (telemetry rows with ANY of the 7 existing row-level flags) / telemetry_row_count. Reported for context; NOT used in status classification (would double-count gps_teleport_count and speed_jump evidence already used directly above)."
+  },
+  "exploratory_only_features_excluded_from_status": {
+    "optional_accel_mag_mean_g": "Vehicle-level mean of Step 4's optional_accel_mag_mean_g. Excluded from status per the same Step 4 finding: one accelerometer snapshot per minute, undocumented phone-mount orientation.",
+    "optional_accel_mag_std_g": "Same caveats.",
+    "optional_gyro_mag_mean_dps": "Same caveats.",
+    "optional_imu_exploratory_flag": "1 if a vehicle's accel-magnitude variability or gyro-magnitude mean is at/above the fleet's own 90th percentile; purely informational, does not affect vehicle_health_status."
+  },
+  "context_only_master_data_fields": {
+    "Vehicle_Type": "Constant across all 30 vehicles (all 'Two-Wheeler (Scooter/Motorcycle)') - zero discriminating power in this dataset.",
+    "Make/Model/Manufacture_Year/Registration_Date/Odometer_KM_Start_of_Week/Last_Service_Date/days_since_last_service": "Reported for transparency only. No maintenance-interval standard or age/mileage threshold exists anywhere in the source data, so these are never used to assign a status.",
+    "days_since_last_service_reference_date": "2026-08-06"
+  },
+  "wording_policy": "vehicle_health_status and status_trigger_reasons describe elevated sensor/data-quality signatures only. No output claims or implies confirmed mechanical failure. 'Investigate'/'Watch' should be read as 'sensor signature warrants inspection', not as a fault diagnosis.",
+  "notes": [
+    "No dashboard built in this step.",
+    "Step 5 outputs (driver_safety_scores.csv, safety_score_summary.json, safety_score_validation_checks.csv) and their methodology were not modified.",
+    "processed/*.csv (Step 2 files) not read or modified.",
+    "Data/*.xlsx not read or modified."
+  ]
+}
