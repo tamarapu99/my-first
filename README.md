@@ -16,6 +16,9 @@ streamlit run app.py
 Then open the URL Streamlit prints (usually `http://localhost:8501`).
 
 ## Pages
+## 📸 Dashboard Preview
+
+![VexarDrive Fleet Analytics Dashboard](dashboard.png)
 
 | # | Page | File |
 |---|------|------|
